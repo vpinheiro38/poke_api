@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'poke_controller.dart';
+import 'poke_viewmodel.dart';
 import 'pokemon.dart';
 
 class PokeView extends StatefulWidget {
@@ -8,11 +8,11 @@ class PokeView extends StatefulWidget {
 }
 
 class _PokeViewState extends State<PokeView> {
-  final controller = PokeController();
+  final viewModel = PokeViewModel();
 
   @override
   void initState() {
-    controller.loadPokemon();
+    viewModel.loadPokemon();
     super.initState();
   }
 
@@ -22,10 +22,10 @@ class _PokeViewState extends State<PokeView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FutureBuilder<Pokemon>(
-              future: controller.pokemon,
+          StreamBuilder<Pokemon>(
+              stream: viewModel.streamController.stream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
+                if (snapshot.connectionState != ConnectionState.active) {
                   return CircularProgressIndicator();
                 }
 
@@ -45,7 +45,7 @@ class _PokeViewState extends State<PokeView> {
             child: ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    controller.loadPokemon();
+                    viewModel.loadPokemon();
                   });
                 },
                 child: Text("Load Pokemon")),
