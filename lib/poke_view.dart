@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'poke_controller.dart';
+import 'poke_viewmodel.dart';
 import 'pokemon.dart';
 
 class PokeView extends StatefulWidget {
@@ -8,11 +8,11 @@ class PokeView extends StatefulWidget {
 }
 
 class _PokeViewState extends State<PokeView> {
-  final controller = PokeController();
+  final viewModel = PokeViewModel();
 
   @override
   void initState() {
-    controller.loadPokemon();
+    viewModel.loadPokemon();
     super.initState();
   }
 
@@ -22,16 +22,16 @@ class _PokeViewState extends State<PokeView> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          FutureBuilder<Pokemon>(
-              future: controller.pokemon,
+          StreamBuilder<Pokemon>(
+              stream: viewModel.streamController.stream,
               builder: (context, snapshot) {
-                if (snapshot.connectionState != ConnectionState.done) {
+                if (snapshot.connectionState != ConnectionState.active) {
                   return CircularProgressIndicator();
                 }
 
                 if (snapshot.hasData) {
                   return PokeCard(snapshot.data.nome, snapshot.data.urlImage,
-                      snapshot.data.weight);
+                      snapshot.data.weight, snapshot.data.abilities);
                 } else if (snapshot.hasError) {
                   return Text(
                     snapshot.error,
@@ -45,7 +45,7 @@ class _PokeViewState extends State<PokeView> {
             child: ElevatedButton(
                 onPressed: () {
                   setState(() {
-                    controller.loadPokemon();
+                    viewModel.loadPokemon();
                   });
                 },
                 child: Text("Load Pokemon")),
@@ -60,12 +60,14 @@ class PokeCard extends StatelessWidget {
   final String _urlImage;
   final String _name;
   final int _weight;
+  final List<Ability> _abilities;
 
-  PokeCard(this._name, this._urlImage, this._weight);
+  PokeCard(this._name, this._urlImage, this._weight, this._abilities);
 
   @override
   Widget build(BuildContext context) {
-    return IntrinsicWidth(
+    return Container(
+      padding: const EdgeInsets.all(40),
       child: Container(
         decoration: BoxDecoration(
             border: Border.all(color: Colors.black, width: 5),
@@ -92,6 +94,18 @@ class PokeCard extends StatelessWidget {
             Text(
               "Peso: $_weight",
               style: TextStyle(fontSize: 20, color: Colors.black),
+            ),
+            Container(
+              height: 200,
+              child: ListView.builder(
+                  itemCount: _abilities.length,
+                  itemBuilder: (context, index) {
+                    return Text(
+                      "Abilidade: ${_abilities[index].name}",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20, color: Colors.black),
+                    );
+                  }),
             )
           ],
         ),
