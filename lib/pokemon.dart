@@ -4,6 +4,8 @@ class Pokemon {
   int weight;
   List<Ability> abilities;
 
+  Pokemon(this.nome, this.urlImage, this.weight, this.abilities);
+
   Pokemon.fromJson(Map<String, dynamic> json) {
     nome = json['name'];
     urlImage = json['sprites']['front_default'];
